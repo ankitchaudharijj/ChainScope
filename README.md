@@ -1,7 +1,6 @@
 # ChainScope
 
-Virtual asset attribution platform — SIH Problem Statement 26182, Team
-PHOENIX. Traces a wallet address, scores which VASP it most likely
+Virtual asset attribution platform — Traces a wallet address, scores which VASP it most likely
 belongs to (with evidence), grades its risk, and traces multi-hop fund
 flow through Neo4j.
 
