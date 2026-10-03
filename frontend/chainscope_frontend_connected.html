@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChainScope | Virtual Asset Attribution System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Design tokens — from the supplied shadcn/Tailwind OKLCH theme,
+   mapped onto this file's existing variable names so every rule
+   below picks up the new palette without being rewritten. oklch()
+   is native CSS (Chrome/Edge/Firefox/Safari 15.4+), so no Tailwind
+   build step is needed to use these values directly.
+============================================================ */
+:root{
+  --blue:oklch(0.5774 0.2091 273.8504);        /* primary */
+  --blue-d:oklch(0.4800 0.1900 273.8504);       /* primary, darkened for hover */
+  --blue-l:oklch(0.9497 0.0027 286.3490);       /* accent */
+  --teal:oklch(0.8406 0.0699 242.1914);         /* chart-4, used as a secondary gradient stop */
+  --saffron:oklch(0.8757 0.0979 83.6546);       /* chart-2 */
+  --ink:oklch(0.2789 0.0091 285.7942);          /* foreground */
+  --ink2:oklch(0.5370 0.0140 280.8555);         /* muted-foreground */
+  --ink3:oklch(0.6800 0.0110 280.8555);
+  --bg:oklch(0.9881 0 0);                       /* background */
+  --card:oklch(1.0000 0 0);
+  --line:oklch(0.9042 0.0027 286.3457);         /* border */
+  --line2:oklch(0.9500 0.0015 286.3457);
+  --success:oklch(0.6000 0.1400 155);      --success-bg:oklch(0.9600 0.0300 155);
+  --warn:oklch(0.7500 0.1500 80);          --warn-bg:oklch(0.9600 0.0400 80);
+  --danger:oklch(0.5156 0.1810 22.5393);   --danger-bg:oklch(0.9600 0.0400 22.5393); /* destructive */
+  --shadow-sm:0 1px 3px 0px hsl(0 0% 0% / 0.08), 0 1px 2px -1px hsl(0 0% 0% / 0.08);
+  --shadow-md:0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
+  --shadow-lg:0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
+  --r-lg:0.875rem; --r-md:0.5rem; --r-sm:0.375rem;   /* radius-xl / radius / radius-sm */
+  --ff:'Noto Sans JP',ui-sans-serif,sans-serif,system-ui;
+  --fd:var(--ff);
+  --fm:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;
+}
+/* Dark variant of the same theme — follows the OS by default, or
+   force with <html data-theme="dark"> / data-theme="light" (the
+   toggle button at the end of this file does exactly that). */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --blue:oklch(0.5774 0.2091 273.8504);
+    --blue-d:oklch(0.6800 0.2100 273.8504);
+    --blue-l:oklch(0.4074 0.0134 280.1154);
+    --teal:oklch(0.8406 0.0699 242.1914);
+    --saffron:oklch(0.8757 0.0979 83.6546);
+    --ink:oklch(1.0000 0 0);
+    --ink2:oklch(0.7230 0.0087 278.5820);
+    --ink3:oklch(0.6000 0.0100 279);
+    --bg:oklch(0.3225 0.0107 278.2517);
+    --card:oklch(0.3502 0.0122 279.2835);
+    --line:oklch(0.3690 0.0103 278.3345);
+    --line2:oklch(0.4074 0.0134 280.1154);
+    --success:oklch(0.7000 0.1500 155);   --success-bg:oklch(0.3300 0.0500 155);
+    --warn:oklch(0.8000 0.1400 80);       --warn-bg:oklch(0.3400 0.0500 80);
+    --danger:oklch(0.8004 0.1141 23.1850); --danger-bg:oklch(0.3600 0.0700 23.1850);
+    --shadow-sm:0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.30);
+    --shadow-md:0 1px 3px 0px hsl(0 0% 0% / 0.35), 0 2px 4px -1px hsl(0 0% 0% / 0.35);
+    --shadow-lg:0 1px 3px 0px hsl(0 0% 0% / 0.40), 0 8px 10px -1px hsl(0 0% 0% / 0.40);
+  }
+}
+:root[data-theme="dark"]{
+  --blue:oklch(0.5774 0.2091 273.8504);
+  --blue-d:oklch(0.6800 0.2100 273.8504);
+  --blue-l:oklch(0.4074 0.0134 280.1154);
+  --teal:oklch(0.8406 0.0699 242.1914);
+  --saffron:oklch(0.8757 0.0979 83.6546);
+  --ink:oklch(1.0000 0 0);
+  --ink2:oklch(0.7230 0.0087 278.5820);
+  --ink3:oklch(0.6000 0.0100 279);
+  --bg:oklch(0.3225 0.0107 278.2517);
+  --card:oklch(0.3502 0.0122 279.2835);
+  --line:oklch(0.3690 0.0103 278.3345);
+  --line2:oklch(0.4074 0.0134 280.1154);
+  --success:oklch(0.7000 0.1500 155);   --success-bg:oklch(0.3300 0.0500 155);
+  --warn:oklch(0.8000 0.1400 80);       --warn-bg:oklch(0.3400 0.0500 80);
+  --danger:oklch(0.8004 0.1141 23.1850); --danger-bg:oklch(0.3600 0.0700 23.1850);
+  --shadow-sm:0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.30);
+  --shadow-md:0 1px 3px 0px hsl(0 0% 0% / 0.35), 0 2px 4px -1px hsl(0 0% 0% / 0.35);
+  --shadow-lg:0 1px 3px 0px hsl(0 0% 0% / 0.40), 0 8px 10px -1px hsl(0 0% 0% / 0.40);
+}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+.dev{font-family:var(--fd)}
+::selection{background:var(--blue-l);color:var(--blue-d)}
+
+/* ---------- LOGIN ---------- */
+/* Full-bleed scene: deep indigo gradient + faint grid + blurred orbs +
+   two network illustrations (inline SVG) + twinkling sparkles, with a wide
+   two-panel card in the middle. The scene is intentionally theme-independent
+   (always the dark "night" look, like Discord's) — only the card follows the
+   light/dark toggle. */
+#lg{
+  position:relative;isolation:isolate;overflow:hidden;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 22px;
+  background:
+    radial-gradient(1100px 640px at 10% 6%, oklch(0.44 0.20 288 / .80), transparent 62%),
+    radial-gradient(950px 620px at 94% 96%, oklch(0.56 0.20 250 / .75), transparent 58%),
+    linear-gradient(160deg, oklch(0.20 0.08 288), oklch(0.26 0.13 277) 52%, oklch(0.32 0.16 264));
+}
+#lg::before{
+  content:"";position:absolute;inset:0;z-index:-3;
+  background-image:
+    linear-gradient(oklch(1 0 0 / .055) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / .055) 1px, transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse at center, #000 28%, transparent 78%);
+          mask-image:radial-gradient(ellipse at center, #000 28%, transparent 78%);
+}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);z-index:-2;pointer-events:none}
+.orb.o1{width:420px;height:420px;left:-120px;top:38%;background:oklch(0.55 0.24 300 / .40)}
+.orb.o2{width:380px;height:380px;right:-100px;top:-90px;background:oklch(0.65 0.16 235 / .35)}
+.orb.o3{width:300px;height:300px;left:42%;bottom:-140px;background:oklch(0.60 0.22 270 / .35)}
+
+.spark{position:absolute;z-index:-1;width:var(--s,12px);height:var(--s,12px);background:#fff;opacity:.0;
+  clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
+  animation:twinkle 4.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes twinkle{0%,100%{opacity:.0;transform:scale(.6) rotate(0)}50%{opacity:.85;transform:scale(1) rotate(45deg)}}
+
+.art{position:absolute;z-index:-1;top:0;bottom:0;margin:auto 0;height:min(84vh,700px);aspect-ratio:420/640;pointer-events:none}
+.art-l{left:clamp(-90px,1.5vw,30px);animation:floaty 10s ease-in-out infinite}
+.art-r{right:clamp(-90px,1.5vw,30px);animation:floaty 12s ease-in-out infinite reverse}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.art .flow{stroke-dasharray:3 7;animation:dash 2.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-20}}
+.art .blk{transform-box:fill-box;transform-origin:center;animation:bob 7s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.art .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 3.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.28;transform:scale(1)}50%{opacity:.55;transform:scale(1.18)}}
+
+.lg-brand{position:absolute;top:26px;left:34px;display:flex;align-items:center;gap:11px;color:#fff;z-index:2}
+.lg-brand .mk{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,oklch(0.62 0.21 274),oklch(0.50 0.20 285));
+  display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px oklch(0.15 0.1 280 / .5), inset 0 0 0 1px oklch(1 0 0 / .18)}
+.lg-brand .nm{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.lg-hero{position:absolute;left:34px;bottom:30px;color:#fff;width:min(340px,calc((100vw - 960px)/2 - 54px));z-index:2}
+.lg-hero b{display:block;font-size:20px;font-weight:800;letter-spacing:-.015em;line-height:1.25;margin-bottom:6px}
+.lg-hero span{font-size:12.5px;color:oklch(1 0 0 / .68);line-height:1.5;display:block}
+.lg-credit{position:absolute;right:34px;bottom:26px;font-size:11px;color:oklch(1 0 0 / .55);z-index:2;text-align:right;line-height:1.5}
+
+/* the card */
+.lg-card{
+  position:relative;width:100%;max-width:960px;display:grid;grid-template-columns:1fr 348px;
+  background:var(--card);border-radius:20px;overflow:hidden;
+  box-shadow:0 34px 90px oklch(0.10 0.06 280 / .60), 0 0 0 1px oklch(1 0 0 / .10);
+}
+.lg-form{padding:42px 46px 30px}
+.lg-gov{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:16px}
+.tri{display:inline-flex;flex-direction:column;width:16px;height:11px;border-radius:2px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.tri i{flex:1}.tri i:nth-child(1){background:#FF9933}.tri i:nth-child(2){background:#fff}.tri i:nth-child(3){background:#138808}
+.lg-form h1{font-size:26px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.lg-form .sub{color:var(--ink2);font-size:13.5px;margin:0 0 26px}
+.fr{margin-bottom:16px}
+.fr label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--ink);margin-bottom:7px;text-transform:uppercase}
+.fr label .req{color:var(--danger)}
+.fr input,.fr select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;
+  font-size:14px;background:color-mix(in oklch, var(--card) 94%, var(--ink));transition:.15s;outline:none;color:var(--ink)}
+.fr input:focus,.fr select:focus{border-color:var(--blue);background:var(--card);box-shadow:0 0 0 4px color-mix(in oklch, var(--blue) 22%, transparent)}
+.lg-forgot{display:inline-block;margin-top:8px;font-size:12px;color:var(--blue);text-decoration:none;font-weight:500;cursor:pointer}
+.lg-forgot:hover{text-decoration:underline}
+.submit{width:100%;margin-top:6px;background:linear-gradient(135deg,var(--blue),oklch(0.48 0.20 284));color:#fff;border:none;
+  padding:13px;border-radius:10px;font-weight:700;font-size:14.5px;letter-spacing:.01em;
+  box-shadow:0 10px 24px color-mix(in oklch, var(--blue) 40%, transparent);transition:.15s}
+.submit:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.submit:disabled{opacity:.6;cursor:default;transform:none}
+.lg-err{color:var(--danger);font-size:12.5px;min-height:18px;margin-top:10px}
+.lg-req{font-size:12.5px;color:var(--ink2);margin-top:2px}
+.lg-req a{color:var(--blue);text-decoration:none;font-weight:600;cursor:pointer}
+.srv{margin-top:20px;border-top:1px solid var(--line2);padding-top:14px;font-size:12px;color:var(--ink2)}
+.srv summary{cursor:pointer;font-weight:600;color:var(--ink2);list-style:none;display:flex;align-items:center;gap:7px}
+.srv summary::-webkit-details-marker{display:none}
+.srv summary:before{content:"›";display:inline-block;transition:.15s;font-size:15px;line-height:1}
+.srv[open] summary:before{transform:rotate(90deg)}
+.srv p{margin:8px 0 0;line-height:1.5;color:var(--ink3)}
+.lg-demo{margin-top:16px;font-size:11px;color:var(--ink3)}
+.lg-demo b{color:var(--ink2);font-family:var(--fm)}
+
+/* right-hand info panel */
+.lg-side{position:relative;overflow:hidden;color:#fff;padding:32px 30px;display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(165deg, oklch(0.52 0.22 274), oklch(0.36 0.17 280))}
+.lg-side:before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;right:-120px;top:-110px;
+  background:radial-gradient(circle, oklch(1 0 0 / .20), transparent 68%)}
+.lg-side:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;left:-100px;bottom:-110px;
+  background:radial-gradient(circle, oklch(0.75 0.15 235 / .30), transparent 68%)}
+.lg-side > *{position:relative;z-index:1}
+.side-pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;padding:5px 11px;border-radius:100px;
+  background:oklch(1 0 0 / .14);border:1px solid oklch(1 0 0 / .22)}
+.lg-side svg.trace{width:100%;height:auto;margin:20px 0 4px;display:block}
+.lg-side svg.trace .flow{stroke-dasharray:3 6;animation:dash 2.2s linear infinite}
+.lg-side h2{font-size:22px;line-height:1.25;letter-spacing:-.02em;font-weight:800;margin:14px 0 14px}
+.lg-side ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.lg-side li{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:oklch(1 0 0 / .86);line-height:1.4}
+.lg-side li svg{flex-shrink:0;margin-top:1px}
+.side-foot{display:flex;align-items:center;gap:8px;font-size:11px;color:oklch(1 0 0 / .68);margin-top:20px;
+  padding-top:14px;border-top:1px solid oklch(1 0 0 / .16)}
+
+@media(max-width:1120px){.art{display:none}}
+/* hero + credit only when the side margins are wide enough to hold them without touching the card */
+@media(max-width:1480px){.lg-hero,.lg-credit{display:none}}
+@media(max-height:760px){.lg-hero{display:none}}
+@media(max-height:720px){#lg{padding-top:88px}}
+@media(max-width:900px){
+  #lg{align-items:flex-start;padding:92px 16px 32px}
+  .lg-card{grid-template-columns:1fr;max-width:440px}
+  .lg-side{display:none}
+  .lg-form{padding:32px 26px 24px}
+  .lg-brand{left:22px;top:22px}
+}
+@media(prefers-reduced-motion:reduce){
+  .spark,.art,.art .flow,.art .blk,.art .pulse,.lg-side svg.trace .flow{animation:none!important}
+  .spark{opacity:.5}
+}
+
+/* ---------- APP SHELL ---------- */
+/* Header band reuses the login's night scene (gradient + grid + orbs + sparkles + network art),
+   so the app feels like the same product. The band is theme-independent; everything below it
+   follows the light/dark toggle. */
+#ap{min-height:100vh;background:var(--bg)}
+.masthead{position:relative;isolation:isolate;overflow:hidden;padding-bottom:78px;
+  background:
+    radial-gradient(900px 420px at 6% -30%, oklch(0.44 0.20 288 / .85), transparent 62%),
+    radial-gradient(820px 460px at 98% 130%, oklch(0.56 0.20 250 / .70), transparent 60%),
+    linear-gradient(160deg, oklch(0.21 0.08 288), oklch(0.27 0.13 277) 55%, oklch(0.32 0.16 264))}
+.masthead::before{content:"";position:absolute;inset:0;z-index:-3;
+  background-image:linear-gradient(oklch(1 0 0 / .05) 1px, transparent 1px),linear-gradient(90deg, oklch(1 0 0 / .05) 1px, transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(ellipse at 40% 0%, #000 20%, transparent 78%);mask-image:radial-gradient(ellipse at 40% 0%, #000 20%, transparent 78%)}
+.mh-orb{position:absolute;border-radius:50%;filter:blur(60px);z-index:-2;pointer-events:none}
+.mh-orb.a{width:320px;height:320px;left:-80px;top:-140px;background:oklch(0.55 0.24 300 / .40)}
+.mh-orb.b{width:300px;height:300px;right:12%;bottom:-170px;background:oklch(0.65 0.16 235 / .32)}
+.mh-art{position:absolute;z-index:-1;right:0;top:0;height:100%;width:min(640px,55%);opacity:.9;pointer-events:none}
+.mh-art .flow{stroke-dasharray:3 7;animation:dash 2.4s linear infinite}
+.mh-art .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 3.4s ease-in-out infinite}
+
+.mast-in{position:relative;max-width:1180px;margin:0 auto;padding:18px 22px 4px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .mk{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,oklch(0.62 0.21 274),oklch(0.50 0.20 285));
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 8px 22px oklch(0.12 0.1 280 / .5), inset 0 0 0 1px oklch(1 0 0 / .2)}
+.brand .txt{line-height:1.2}
+.brand .nm{font-size:20px;font-weight:800;letter-spacing:-.02em;color:#fff}
+.brand .tl{font-size:9.5px;color:oklch(1 0 0 / .62);font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.mast-user{margin-left:auto;display:flex;align-items:center;gap:11px;padding:5px 6px 5px 16px;border-radius:100px;
+  background:oklch(1 0 0 / .09);border:1px solid oklch(1 0 0 / .16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.uid{font-size:11.5px;color:oklch(1 0 0 / .80);text-align:right;line-height:1.3;max-width:330px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,oklch(0.68 0.17 250),oklch(0.55 0.21 285));
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .25)}
+.signout{background:oklch(1 0 0 / .12);border:1px solid oklch(1 0 0 / .20);color:#fff;border-radius:100px;
+  padding:7px 14px;font-size:12px;font-weight:700;transition:.15s;display:flex;align-items:center;gap:6px}
+.signout:hover{background:var(--danger);border-color:var(--danger)}
+
+.nav{position:relative;max-width:1180px;margin:0 auto;padding:12px 22px 0;display:flex;gap:6px;overflow-x:auto}
+.nav button{background:none;border:1px solid transparent;color:oklch(1 0 0 / .72);padding:9px 16px;font-size:13px;font-weight:600;
+  border-radius:100px;white-space:nowrap;display:flex;align-items:center;gap:8px;transition:.15s}
+.nav button svg{width:16px;height:16px;opacity:.8}
+.nav button:hover{color:#fff;background:oklch(1 0 0 / .10)}
+.nav button.on{color:#fff;background:oklch(1 0 0 / .17);border-color:oklch(1 0 0 / .26);box-shadow:0 8px 20px oklch(0.12 0.08 280 / .35)}
+.nav button.on svg{opacity:1}
+
+.crumb{position:relative}
+.crumb-in{max-width:1180px;margin:0 auto;padding:16px 22px 0;font-size:11.5px;color:oklch(1 0 0 / .55)}
+.crumb-in b{color:#fff;font-weight:700}
+.ll{font-family:var(--fm);font-size:10.5px}
+
+.wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 22px 26px}
+.col{min-width:0}
+.view{display:none;padding-top:30px}
+.view.on{display:block}
+#v-ex{padding-top:0}
+
+/* floating search card that straddles the band */
+.qbar{position:relative;margin-top:-42px;background:var(--card);border-radius:18px;padding:10px 10px 10px 20px;margin-bottom:24px;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  box-shadow:0 24px 54px oklch(0.15 0.08 280 / .28), 0 0 0 1px var(--line);transition:box-shadow .18s}
+.qbar:focus-within{box-shadow:0 24px 54px oklch(0.15 0.08 280 / .30), 0 0 0 2px var(--blue)}
+.qbar .qicon{color:var(--blue);display:flex}
+.qbar input{flex:1;min-width:220px;border:none;padding:15px 6px;font-size:14px;font-family:var(--fm);outline:none;background:transparent;color:var(--ink)}
+.qbar input::placeholder{color:var(--ink3)}
+.btn{background:linear-gradient(135deg,var(--blue),oklch(0.48 0.20 284));color:#fff;border:none;border-radius:var(--r-sm);padding:9px 20px;font-size:13px;
+  font-weight:700;box-shadow:var(--shadow-sm);transition:.15s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn.sec{background:var(--card);border:1.5px solid var(--line);color:var(--ink);box-shadow:none}
+.btn.sec:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l);transform:none;filter:none}
+.qbar .btn{padding:13px 26px;border-radius:12px;font-size:13.5px}
+
+h2.ph{font-size:22px;margin:0 0 4px;font-weight:800;letter-spacing:-.015em}
+p.pd{font-size:13.5px;color:var(--ink2);margin:0 0 20px;max-width:640px}
+
+/* panels — these class names (pnl/pnl-h/pnl-b/rt) are emitted directly
+   by the JS templates, so they're restyled here rather than renamed */
+.pnl{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:16px;
+  box-shadow:var(--shadow-sm);overflow:hidden}
+.pnl-h{padding:13px 18px;border-bottom:1px solid var(--line2);display:flex;justify-content:space-between;
+  align-items:center;gap:10px;flex-wrap:wrap;background:color-mix(in oklch, var(--card) 98%, var(--ink))}
+.pnl-h h3{margin:0;font-size:13.5px;font-weight:700;letter-spacing:-.005em}
+.pnl-h .rt{font-size:11px;color:var(--ink3);font-weight:500}
+.pnl-b{padding:16px 18px}
+.pnl-b.flush{padding:0}
+
+/* generic + case + vasp + audit tables (class "g") */
+table.g{width:100%;border-collapse:collapse}
+table.g th{text-align:left;color:var(--ink3);font-weight:700;font-size:10.5px;letter-spacing:.04em;
+  text-transform:uppercase;padding:10px 16px;border-bottom:1.5px solid var(--line)}
+table.g td{padding:12px 16px;border-bottom:1px solid var(--line2);font-size:13px;color:var(--ink)}
+table.g tbody tr{transition:.1s}
+table.g tbody tr.clk{cursor:pointer}
+table.g tbody tr:hover td{background:color-mix(in oklch, var(--card) 96%, var(--ink))}
+table.g tbody tr.sel td{background:var(--blue-l)}
+table.g tbody tr:last-child td{border-bottom:none}
+
+/* particulars key-value table */
+table.kv{width:100%;border-collapse:separate;border-spacing:0}
+table.kv td{padding:10px 16px;font-size:13px;border-bottom:1px solid var(--line2)}
+table.kv td.k{color:var(--ink3);width:170px;font-weight:600;font-size:11px;letter-spacing:.03em;text-transform:uppercase}
+table.kv td.v{font-family:var(--fm);color:var(--ink)}
+table.kv tr:last-child td{border-bottom:none}
+
+.mono{font-family:var(--fm);font-size:12.5px}
+.num{text-align:right;font-family:var(--fm)}
+
+/* status / risk-grade pills — soft-tint, not solid fill */
+.st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:3px 10px;
+  border-radius:100px;letter-spacing:.03em}
+.st.HIGH,.st.high{color:var(--danger);background:var(--danger-bg)}
+.st.MEDIUM,.st.medium{color:var(--warn);background:var(--warn-bg)}
+.st.LOW,.st.low{color:var(--success);background:var(--success-bg)}
+
+/* alert banners */
+.alert{border-radius:var(--r-md);padding:13px 16px;margin-bottom:16px;display:flex;gap:11px;align-items:flex-start;
+  font-size:13px;border-left:4px solid}
+.alert.hi{background:var(--danger-bg);border-color:var(--danger);color:var(--danger)}
+.alert.md{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.alert.lo{background:var(--success-bg);border-color:var(--success);color:var(--success)}
+.alert b{display:block;margin-bottom:2px;font-size:13.5px}
+
+/* evidence-score meter */
+.mt{display:flex;align-items:center;gap:9px}
+.mtb{flex:1;height:8px;background:var(--line2);border-radius:100px;overflow:hidden;min-width:70px}
+.mtf{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:100px;transition:width .4s}
+.mtn{font-family:var(--fm);font-size:12.5px;font-weight:700;color:var(--blue);width:38px;text-align:right}
+
+/* evidence list */
+ol.ev{margin:0;padding-left:0;list-style:none;counter-reset:ev}
+ol.ev li{counter-increment:ev;position:relative;padding:8px 0 8px 30px;font-size:13px;border-bottom:1px solid var(--line2)}
+ol.ev li:last-child{border-bottom:none}
+ol.ev li:before{content:counter(ev,lower-alpha);position:absolute;left:0;top:8px;width:20px;height:20px;
+  border-radius:6px;background:var(--blue-l);color:var(--blue-d);font-size:10.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center}
+ol.ev b{color:var(--ink)}
+ol.ev span{color:var(--ink2)}
+
+/* graph legend */
+.lgd{margin-top:10px;font-size:11px;color:var(--ink2);display:flex;gap:16px;flex-wrap:wrap}
+.lgd span{display:flex;align-items:center;gap:6px}
+.lk{width:10px;height:10px;border-radius:3px}
+
+/* loading / progress */
+.prog{padding:30px 14px;text-align:center}
+.prog .pt{font-size:12.5px;color:var(--ink2);font-weight:500}
+.pb{height:6px;background:var(--line2);border-radius:100px;max-width:320px;margin:14px auto 0;overflow:hidden}
+.pb i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));width:0;
+  border-radius:100px;transition:width .3s}
+
+/* empty states */
+.nil{padding:34px 16px;text-align:center;color:var(--ink2);font-size:13.5px}
+.nil b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:5px;font-weight:700}
+.spl{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;justify-content:center}
+.spl a{font-family:var(--fm);font-size:11px;border:1.5px solid var(--line);color:var(--blue);padding:6px 12px;
+  border-radius:100px;text-decoration:none;transition:.12s;background:var(--card)}
+.spl a:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+.fn{font-size:12px;color:var(--ink3);margin-top:10px;font-style:italic}
+textarea.rp{width:100%;height:330px;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:14px;
+  font-family:var(--fm);font-size:11.5px;line-height:1.6;color:var(--ink);resize:vertical;outline:none;background:color-mix(in oklch, var(--card) 96%, var(--ink))}
+textarea.rp:focus{border-color:var(--blue)}
+.stsel{font-size:11.5px;border:1.5px solid var(--line);border-radius:100px;padding:4px 10px;background:var(--card);color:var(--ink)}
+
+.pagehead-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);
+  color:#fff;padding:11px 22px;border-radius:100px;font-size:13px;font-weight:500;transition:transform .25s;
+  z-index:90;box-shadow:var(--shadow-lg)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+footer{background:var(--card);border-top:1px solid var(--line);margin-top:30px}
+.ft-in{max-width:1180px;margin:0 auto;padding:14px 22px;display:flex;justify-content:space-between;gap:14px;
+  flex-wrap:wrap;font-size:11.5px;color:var(--ink3)}
+.ft-in a{color:var(--ink2);text-decoration:none;font-weight:500}
+.bot{border-top:1px solid var(--line2);text-align:center;padding:9px 22px;font-size:10.5px;color:var(--ink3)}
+
+@media(max-width:820px){
+  .wrap{padding:16px}
+  .pagehead-row{align-items:flex-start}
+  table.kv td.k{width:120px}
+  .mast-user .uid{display:none}
+}
+
+/* ---------- APP: dashboard + polish ---------- */
+h2.ph{display:flex;align-items:center;gap:12px}
+h2.ph::before{content:"";width:38px;height:38px;border-radius:12px;flex-shrink:0;box-shadow:0 8px 18px color-mix(in oklch, var(--blue) 30%, transparent)}
+#v-ex h2.ph::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") center/20px no-repeat, linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285))}
+#v-cs h2.ph::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z'/%3E%3C/svg%3E") center/20px no-repeat, linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285))}
+#v-vs h2.ph::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21V9l9-6 9 6v12M9 21v-6h6v6'/%3E%3C/svg%3E") center/20px no-repeat, linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285))}
+#v-rp h2.ph::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z'/%3E%3Cpath d='M14 2v6h6M9 13h6M9 17h6'/%3E%3C/svg%3E") center/20px no-repeat, linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285))}
+#v-ad h2.ph::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4l3 2'/%3E%3C/svg%3E") center/20px no-repeat, linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285))}
+
+.kick{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.hello{margin-bottom:22px}
+.hello p.pd{margin:0}
+
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.tile{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;
+  display:flex;gap:14px;align-items:center;box-shadow:var(--shadow-sm);transition:.2s}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.tile::after{content:"";position:absolute;right:-30px;top:-30px;width:104px;height:104px;border-radius:50%;
+  background:radial-gradient(circle, var(--tc), transparent 70%);opacity:.16;pointer-events:none}
+.ti{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;color:#fff;background:var(--tg);
+  box-shadow:0 8px 18px color-mix(in oklch, var(--tc) 32%, transparent)}
+.tile b{display:block;font-size:27px;line-height:1.05;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tile span{font-size:12px;color:var(--ink2);font-weight:500}
+.tile.t1{--tc:var(--blue);--tg:linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285))}
+.tile.t2{--tc:var(--danger);--tg:linear-gradient(135deg,oklch(0.68 0.19 28),oklch(0.55 0.20 22))}
+.tile.t3{--tc:var(--teal);--tg:linear-gradient(135deg,oklch(0.72 0.12 225),oklch(0.56 0.15 245))}
+.tile.t4{--tc:var(--success);--tg:linear-gradient(135deg,oklch(0.72 0.16 160),oklch(0.56 0.15 165))}
+
+.dgrid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start}
+.dgrid .pnl{margin-bottom:0}
+.dgrid .spl{justify-content:flex-start;margin-top:14px}
+.act{list-style:none;margin:0;padding:4px 0}
+.act li{display:flex;gap:12px;padding:11px 18px;align-items:center;border-bottom:1px solid var(--line2)}
+.act li:last-child{border-bottom:none}
+.act .dot{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;background:var(--blue-l);color:var(--blue)}
+.act .tx{min-width:0;flex:1}
+.act .tx b{display:block;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act .tx span{display:block;font-size:11.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act time{font-size:10.5px;color:var(--ink3);white-space:nowrap;font-family:var(--fm)}
+.act .none{justify-content:center;color:var(--ink3);font-size:12.5px;padding:26px 18px}
+
+.sec-t{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin:26px 0 12px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stp{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow-sm)}
+.stp .sn{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:#fff;
+  background:linear-gradient(135deg,oklch(0.62 0.20 274),oklch(0.50 0.21 285));font-weight:800;font-size:14px}
+.stp b{font-size:13.5px;display:block;margin-bottom:3px}
+.stp p{margin:0;font-size:12px;color:var(--ink2);line-height:1.5}
+.stp:not(:last-child)::after{content:"";position:absolute;right:-16px;top:50%;width:16px;height:2px;
+  background:repeating-linear-gradient(90deg,var(--blue) 0 3px,transparent 3px 6px);opacity:.5}
+
+/* panels: accent hairline + entrance motion */
+.pnl{position:relative}
+.pnl::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;z-index:1;
+  background:linear-gradient(90deg,var(--blue),var(--teal) 55%,transparent)}
+.pnl-h{padding-top:15px}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.view.on > *,#exOut > *,#exNil > *{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+#exOut>*:nth-child(2),#exNil>*:nth-child(2){animation-delay:.05s}
+#exOut>*:nth-child(3),#exNil>*:nth-child(3){animation-delay:.10s}
+#exOut>*:nth-child(4),#exNil>*:nth-child(4){animation-delay:.15s}
+#exOut>*:nth-child(5),#exNil>*:nth-child(5){animation-delay:.20s}
+#exOut>*:nth-child(6){animation-delay:.25s}
+#exOut>*:nth-child(7){animation-delay:.30s}
+#exOut>*:nth-child(8){animation-delay:.35s}
+
+/* risk banner as a hero */
+.alert{padding:16px 18px;align-items:center;gap:14px;border-radius:16px;box-shadow:var(--shadow-sm)}
+.alert>span:first-child{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex-shrink:0;font-size:0;
+  background:color-mix(in oklch, currentColor 16%, transparent)}
+.alert>span:first-child::before{font-size:21px;font-weight:800;line-height:1}
+.alert.hi>span:first-child::before,.alert.md>span:first-child::before{content:"!"}
+.alert.lo>span:first-child::before{content:"\2713"}
+.alert b{font-size:15px}
+
+/* graphs sit on a light "evidence sheet" in both themes (script draws dark-on-light) */
+#gr{display:block;width:100%;height:auto;max-height:340px;background:#fff;border-radius:12px;box-shadow:0 0 0 1px var(--line)}
+svg[style*="background:#fff"]{border-radius:12px;box-shadow:0 0 0 1px var(--line)}
+table.g thead th{background:color-mix(in oklch, var(--card) 95%, var(--ink))}
+
+/* theme button lives bottom-right now so it never collides with the header band */
+#themeBtn{top:auto!important;bottom:20px!important;right:20px!important}
+.lg-credit{right:84px}
+
+@media(max-width:1000px){.uid{display:none}.mast-user{padding-left:6px}.mh-art{display:none}}
+@media(max-width:900px){
+  .tiles{grid-template-columns:1fr 1fr}
+  .dgrid,.steps{grid-template-columns:1fr}
+  .stp:not(:last-child)::after{display:none}
+}
+@media(max-width:520px){.tiles{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){
+  .view.on > *,#exOut > *,#exNil > *,.mh-art .flow,.mh-art .pulse{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<button id="themeBtn" title="Toggle light / dark theme" aria-label="Toggle light / dark theme" style="
+  position:fixed;top:16px;right:16px;z-index:200;width:36px;height:36px;border-radius:10px;
+  background:var(--card);border:1.5px solid var(--line);box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;justify-content:center;color:var(--ink2);">
+  <svg id="themeIconSun" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  <svg id="themeIconMoon" width="15" height="15" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+</button>
+
+<!-- ================== LOGIN ================== -->
+<div id="lg">
+
+  <!-- scene layers (decorative only) -->
+  <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
+  <i class="spark" style="left:8%;top:18%;--s:14px;--d:0s"></i>
+  <i class="spark" style="left:22%;top:72%;--s:10px;--d:1.2s"></i>
+  <i class="spark" style="left:31%;top:12%;--s:9px;--d:2.4s"></i>
+  <i class="spark" style="left:15%;top:46%;--s:12px;--d:3.1s"></i>
+  <i class="spark" style="left:86%;top:14%;--s:13px;--d:.6s"></i>
+  <i class="spark" style="left:92%;top:58%;--s:9px;--d:1.9s"></i>
+  <i class="spark" style="left:74%;top:82%;--s:12px;--d:2.8s"></i>
+  <i class="spark" style="left:66%;top:9%;--s:8px;--d:3.6s"></i>
+  <i class="spark" style="left:52%;top:93%;--s:10px;--d:1.5s"></i>
+
+  <!-- LEFT illustration: wallet graph flowing into VASP clusters -->
+  <svg class="art art-l" viewBox="0 0 420 640" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="gBlkL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fb0ff" stop-opacity=".60"/><stop offset="1" stop-color="#5b3df5" stop-opacity=".22"/></linearGradient>
+      <radialGradient id="glA"><stop offset="0" stop-color="#7dd3fc" stop-opacity=".62"/><stop offset=".55" stop-color="#7dd3fc" stop-opacity=".16"/><stop offset="1" stop-color="#7dd3fc" stop-opacity="0"/></radialGradient><radialGradient id="glB"><stop offset="0" stop-color="#a5b4fc" stop-opacity=".62"/><stop offset=".55" stop-color="#a5b4fc" stop-opacity=".16"/><stop offset="1" stop-color="#a5b4fc" stop-opacity="0"/></radialGradient>
+    </defs>
+    <g stroke="#c7d2ff" stroke-opacity=".32" stroke-width="1.4">
+      <line x1="70" y1="120" x2="180" y2="190"/><line x1="180" y1="190" x2="120" y2="320"/>
+      <line x1="180" y1="190" x2="300" y2="250"/><line x1="300" y1="250" x2="230" y2="400"/>
+      <line x1="120" y1="320" x2="230" y2="400"/><line x1="230" y1="400" x2="340" y2="470"/>
+      <line x1="120" y1="320" x2="60" y2="450"/><line x1="60" y1="450" x2="170" y2="540"/>
+      <line x1="230" y1="400" x2="170" y2="540"/><line x1="180" y1="190" x2="250" y2="110"/><line x1="300" y1="250" x2="385" y2="330"/><line x1="60" y1="450" x2="35" y2="560"/><line x1="340" y1="470" x2="385" y2="400"/>
+    </g>
+    <g stroke="#7dd3fc" stroke-opacity=".9" stroke-width="1.8" class="flow">
+      <line x1="70" y1="120" x2="180" y2="190"/><line x1="180" y1="190" x2="300" y2="250"/>
+      <line x1="120" y1="320" x2="230" y2="400"/><line x1="230" y1="400" x2="170" y2="540"/>
+    </g>
+    <!-- floating ledger blocks -->
+    <g class="blk"><rect x="20" y="222" width="46" height="46" rx="11" transform="rotate(-12 43 245)" fill="url(#gBlkL)" stroke="#fff" stroke-opacity=".28"/></g>
+    <g class="blk" style="animation-delay:-2.5s"><rect x="330" y="92" width="40" height="40" rx="10" transform="rotate(14 350 112)" fill="url(#gBlkL)" stroke="#fff" stroke-opacity=".28"/></g>
+    <g class="blk" style="animation-delay:-4.5s"><rect x="290" y="560" width="36" height="36" rx="9" transform="rotate(8 308 578)" fill="url(#gBlkL)" stroke="#fff" stroke-opacity=".28"/></g>
+    <!-- VASP hex nodes with glow -->
+    <circle class="pulse" cx="300" cy="250" r="60" fill="url(#glA)"/>
+    <polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" transform="translate(300 250)" fill="#0b1240" fill-opacity=".85" stroke="#7dd3fc" stroke-width="2"/>
+    <text x="300" y="254" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10" font-weight="700" fill="#e0f2fe">VASP</text>
+    <circle class="pulse" cx="170" cy="540" r="56" fill="url(#glB)" style="animation-delay:-1.4s"/>
+    <polygon points="0,-20 17,-10 17,10 0,20 -17,10 -17,-10" transform="translate(170 540)" fill="#0b1240" fill-opacity=".85" stroke="#a5b4fc" stroke-width="2"/>
+    <text x="170" y="544" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" font-weight="700" fill="#e0e7ff">VASP</text>
+    <!-- wallet nodes -->
+    <circle cx="180" cy="190" r="13" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2"/><circle cx="180" cy="190" r="5" fill="#fff"/>
+    <circle cx="70" cy="120" r="6" fill="#fff" fill-opacity=".9"/><circle cx="120" cy="320" r="7" fill="#fff" fill-opacity=".9"/>
+    <circle cx="230" cy="400" r="8" fill="#fff" fill-opacity=".95"/><circle cx="60" cy="450" r="5" fill="#fff" fill-opacity=".8"/>
+    <circle cx="340" cy="470" r="6" fill="#fff" fill-opacity=".8"/><circle cx="250" cy="110" r="4" fill="#fff" fill-opacity=".7"/><circle cx="385" cy="330" r="4.5" fill="#fff" fill-opacity=".7"/><circle cx="35" cy="560" r="4" fill="#fff" fill-opacity=".65"/><circle cx="385" cy="400" r="3.5" fill="#fff" fill-opacity=".6"/>
+    <g font-family="ui-monospace,monospace" font-size="10" fill="#fff" fill-opacity=".55">
+      <text x="82" y="108">0x71C4…9A2</text><text x="196" y="182">suspect</text>
+      <text x="132" y="338">0xA1B2…C3</text><text x="244" y="424">0xD4E5…F6</text>
+      <text x="340" y="496">0xMIX…001</text>
+    </g>
+  </svg>
+
+  <!-- RIGHT illustration: shield at the centre, orbiting evidence + chain -->
+  <svg class="art art-r" viewBox="0 0 420 640" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="gBlkR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a5d8ff" stop-opacity=".55"/><stop offset="1" stop-color="#4f46e5" stop-opacity=".22"/></linearGradient>
+      <radialGradient id="glC"><stop offset="0" stop-color="#818cf8" stop-opacity=".60"/><stop offset=".6" stop-color="#6366f1" stop-opacity=".16"/><stop offset="1" stop-color="#6366f1" stop-opacity="0"/></radialGradient><radialGradient id="glD"><stop offset="0" stop-color="#7dd3fc" stop-opacity=".62"/><stop offset=".55" stop-color="#7dd3fc" stop-opacity=".16"/><stop offset="1" stop-color="#7dd3fc" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle class="pulse" cx="210" cy="190" r="150" fill="url(#glC)"/>
+    <circle cx="210" cy="190" r="128" stroke="#fff" stroke-opacity=".16" stroke-dasharray="2 7"/>
+    <circle cx="210" cy="190" r="178" stroke="#fff" stroke-opacity=".10" stroke-dasharray="2 9"/>
+    <g stroke="#c7d2ff" stroke-opacity=".30" stroke-width="1.3">
+      <line x1="210" y1="190" x2="338" y2="190"/><line x1="210" y1="190" x2="120" y2="100"/>
+      <line x1="210" y1="190" x2="110" y2="290"/><line x1="210" y1="190" x2="300" y2="300"/>
+    </g>
+    <g stroke="#7dd3fc" stroke-opacity=".85" stroke-width="1.8" class="flow">
+      <line x1="338" y1="190" x2="210" y2="190"/><line x1="120" y1="100" x2="210" y2="190"/><line x1="110" y1="290" x2="210" y2="190"/>
+    </g>
+    <circle cx="338" cy="190" r="7" fill="#fff"/><circle cx="120" cy="100" r="6" fill="#fff" fill-opacity=".9"/>
+    <circle cx="110" cy="290" r="7" fill="#fff" fill-opacity=".9"/><circle cx="300" cy="300" r="5" fill="#fff" fill-opacity=".8"/>
+    <!-- shield -->
+    <g transform="translate(152 128) scale(4.85)">
+      <path d="M12 2L3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4z" fill="#0b1240" fill-opacity=".94" stroke="#fff" stroke-opacity=".9" stroke-width=".55" stroke-linejoin="round"/>
+      <path d="M8.6 12.2l2.3 2.3 4.6-4.8" stroke="#7dd3fc" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- ledger chain -->
+    <g stroke="#c7d2ff" stroke-opacity=".38" stroke-width="1.5">
+      <line x1="84" y1="470" x2="176" y2="500"/><line x1="176" y1="500" x2="268" y2="470"/><line x1="268" y1="470" x2="350" y2="530"/>
+    </g>
+    <g stroke="#7dd3fc" stroke-opacity=".9" stroke-width="1.8" class="flow"><line x1="84" y1="470" x2="176" y2="500"/><line x1="176" y1="500" x2="268" y2="470"/></g>
+    <g class="blk"><rect x="60" y="446" width="48" height="48" rx="12" fill="url(#gBlkR)" stroke="#fff" stroke-opacity=".30"/></g>
+    <g class="blk" style="animation-delay:-2s"><rect x="152" y="476" width="48" height="48" rx="12" fill="url(#gBlkR)" stroke="#fff" stroke-opacity=".30"/></g>
+    <g class="blk" style="animation-delay:-4s"><rect x="244" y="446" width="48" height="48" rx="12" fill="url(#gBlkR)" stroke="#fff" stroke-opacity=".30"/></g>
+    <circle class="pulse" cx="350" cy="530" r="56" fill="url(#glD)"/>
+    <polygon points="0,-21 18,-10.5 18,10.5 0,21 -18,10.5 -18,-10.5" transform="translate(350 530)" fill="#0b1240" fill-opacity=".85" stroke="#7dd3fc" stroke-width="2"/>
+    <text x="350" y="534" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10" font-weight="700" fill="#e0f2fe">VASP</text>
+    <g font-family="ui-monospace,monospace" font-size="10" fill="#fff" fill-opacity=".55">
+      <text x="316" y="176">hop 1</text><text x="70" y="90">hop 2</text><text x="116" y="316">0x9F2E…11</text>
+      <text x="66" y="514">block</text><text x="160" y="544">block</text><text x="252" y="514">block</text>
+    </g>
+  </svg>
+
+  <div class="lg-brand">
+    <div class="mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4z" fill="white" fill-opacity=".95"/><path d="M9 12l2 2 4-4" stroke="oklch(0.5 0.2 275)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="nm">ChainScope</span>
+  </div>
+
+  <div class="lg-hero">
+    <b>Trace. Attribute. Investigate.</b>
+    <span>Turn an unknown wallet address into a probable VASP — with evidence, explainability and risk.</span>
+  </div>
+  <div class="lg-credit">Smart India Hackathon &middot; PS 26182<br>Team PHOENIX</div>
+
+  <!-- the card -->
+  <div class="lg-card">
+    <div class="lg-form">
+      <div class="lg-gov"><span class="tri"><i></i><i></i><i></i></span>I4C &middot; Ministry of Home Affairs</div>
+      <h1>Welcome back, Officer</h1>
+      <p class="sub">Sign in to continue your investigation.</p>
+
+      <div class="fr">
+        <label>Officer ID / Email <span class="req">*</span></label>
+        <input id="lUser" type="text" value="io.cyber@i4c.gov.in" autocomplete="username">
+      </div>
+      <div class="fr">
+        <label>Password <span class="req">*</span></label>
+        <input id="lPass" type="password" value="demo123" autocomplete="current-password">
+        <a class="lg-forgot">Forgot your password?</a>
+      </div>
+      <button class="submit" id="lBtn">Login</button>
+      <div class="lg-err" id="lErr"></div>
+      <div class="lg-req">Need access? <a>Request access</a></div>
+
+      <details class="srv">
+        <summary>Server settings</summary>
+        <div class="fr" style="margin:10px 0 0">
+          <label>API Base URL <span class="req">*</span></label>
+          <input id="lApi" type="text" value="http://localhost:8000" autocomplete="off">
+        </div>
+        <p>This build talks to the live ChainScope API &mdash; start the backend (<code>docker compose up</code>) and seed it before signing in.</p>
+      </details>
+      <div class="lg-demo">Demo login is pre-filled &middot; password <b>demo123</b></div>
+    </div>
+
+    <aside class="lg-side">
+      <div>
+        <span class="side-pill">SECURE OFFICER ACCESS</span>
+        <svg class="trace" viewBox="0 0 290 150" fill="none" aria-hidden="true">
+          <g stroke="#fff" stroke-opacity=".28" stroke-width="1.4">
+            <line x1="34" y1="78" x2="118" y2="44"/><line x1="34" y1="78" x2="118" y2="112"/>
+            <line x1="118" y1="44" x2="222" y2="78"/><line x1="118" y1="112" x2="222" y2="78"/>
+          </g>
+          <g stroke="#7dd3fc" stroke-width="1.8" class="flow">
+            <line x1="34" y1="78" x2="118" y2="44"/><line x1="118" y1="44" x2="222" y2="78"/>
+          </g>
+          <circle cx="34" cy="78" r="12" fill="#fff" fill-opacity=".14" stroke="#fff" stroke-opacity=".8" stroke-width="1.6"/><circle cx="34" cy="78" r="4.5" fill="#fff"/>
+          <circle cx="118" cy="44" r="6" fill="#fff"/><circle cx="118" cy="112" r="6" fill="#fff" fill-opacity=".8"/>
+          <polygon points="0,-20 17.3,-10 17.3,10 0,20 -17.3,10 -17.3,-10" transform="translate(222 78)" fill="#0b1240" fill-opacity=".8" stroke="#7dd3fc" stroke-width="2"/>
+          <text x="222" y="82" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9.5" font-weight="700" fill="#e0f2fe">VASP</text>
+          <rect x="196" y="18" width="80" height="20" rx="10" fill="#22c55e" fill-opacity=".22" stroke="#4ade80" stroke-opacity=".7"/>
+          <text x="236" y="32" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10" font-weight="700" fill="#bbf7d0">92% match</text>
+          <g font-family="ui-monospace,monospace" font-size="9" fill="#fff" fill-opacity=".62">
+            <text x="6" y="106">unknown wallet</text><text x="90" y="134">intermediary</text>
+          </g>
+        </svg>
+        <h2>Follow the funds.<br>Name the service.</h2>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#fff" fill-opacity=".18"/><path d="M7.5 12.3l3 3 6-6.3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Evidence-backed VASP attribution</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#fff" fill-opacity=".18"/><path d="M7.5 12.3l3 3 6-6.3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Multi-hop fund-flow graph</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#fff" fill-opacity=".18"/><path d="M7.5 12.3l3 3 6-6.3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Explainable risk grading &amp; PDF reports</li>
+        </ul>
+      </div>
+      <div class="side-foot">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#fff" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        Encrypted session &middot; every action is audit-logged
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ================== APP ================== -->
+<div id="ap" style="display:none">
+  <div class="masthead">
+    <span class="mh-orb a"></span><span class="mh-orb b"></span>
+    <i class="spark" style="left:5%;top:34%;--s:11px;--d:.3s"></i>
+    <i class="spark" style="left:27%;top:14%;--s:9px;--d:1.6s"></i>
+    <i class="spark" style="left:47%;top:52%;--s:12px;--d:2.5s"></i>
+    <i class="spark" style="left:63%;top:16%;--s:8px;--d:3.4s"></i>
+    <i class="spark" style="left:83%;top:62%;--s:10px;--d:1.1s"></i>
+    <svg class="mh-art" viewBox="0 0 640 230" fill="none" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="mhGlA"><stop offset="0" stop-color="#7dd3fc" stop-opacity=".6"/><stop offset=".55" stop-color="#7dd3fc" stop-opacity=".15"/><stop offset="1" stop-color="#7dd3fc" stop-opacity="0"/></radialGradient>
+        <radialGradient id="mhGlB"><stop offset="0" stop-color="#a5b4fc" stop-opacity=".6"/><stop offset=".55" stop-color="#a5b4fc" stop-opacity=".15"/><stop offset="1" stop-color="#a5b4fc" stop-opacity="0"/></radialGradient>
+      </defs>
+      <g stroke="#c7d2ff" stroke-opacity=".26" stroke-width="1.3">
+        <line x1="120" y1="150" x2="230" y2="90"/><line x1="230" y1="90" x2="345" y2="140"/><line x1="345" y1="140" x2="450" y2="70"/>
+        <line x1="450" y1="70" x2="560" y2="120"/><line x1="230" y1="90" x2="260" y2="30"/><line x1="345" y1="140" x2="380" y2="205"/>
+        <line x1="560" y1="120" x2="610" y2="190"/><line x1="120" y1="150" x2="80" y2="205"/>
+      </g>
+      <g stroke="#7dd3fc" stroke-opacity=".85" stroke-width="1.7" class="flow">
+        <line x1="120" y1="150" x2="230" y2="90"/><line x1="230" y1="90" x2="345" y2="140"/><line x1="345" y1="140" x2="450" y2="70"/>
+      </g>
+      <circle class="pulse" cx="450" cy="70" r="52" fill="url(#mhGlA)"/>
+      <polygon points="0,-19 16.5,-9.5 16.5,9.5 0,19 -16.5,9.5 -16.5,-9.5" transform="translate(450 70)" fill="#0b1240" fill-opacity=".85" stroke="#7dd3fc" stroke-width="2"/>
+      <text x="450" y="73.5" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" font-weight="700" fill="#e0f2fe">VASP</text>
+      <circle class="pulse" cx="560" cy="120" r="44" fill="url(#mhGlB)" style="animation-delay:-1.6s"/>
+      <polygon points="0,-15 13,-7.5 13,7.5 0,15 -13,7.5 -13,-7.5" transform="translate(560 120)" fill="#0b1240" fill-opacity=".85" stroke="#a5b4fc" stroke-width="2"/>
+      <circle cx="120" cy="150" r="10" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.8"/><circle cx="120" cy="150" r="4" fill="#fff"/>
+      <circle cx="230" cy="90" r="6" fill="#fff" fill-opacity=".9"/><circle cx="345" cy="140" r="7" fill="#fff" fill-opacity=".9"/>
+      <circle cx="260" cy="30" r="4" fill="#fff" fill-opacity=".7"/><circle cx="380" cy="205" r="4" fill="#fff" fill-opacity=".7"/>
+      <circle cx="610" cy="190" r="4" fill="#fff" fill-opacity=".7"/><circle cx="80" cy="205" r="4" fill="#fff" fill-opacity=".65"/>
+    </svg>
+    <div class="mast-in">
+      <div class="brand">
+        <div class="mk"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4z" fill="white" fill-opacity=".95"/><path d="M9 12l2 2 4-4" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="txt"><div class="nm">ChainScope</div><div class="tl">Virtual Asset Attribution</div></div>
+      </div>
+      <div class="mast-user">
+        <div class="uid" id="lastLog"></div>
+        <div class="avatar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="white" stroke-width="2"/></svg>
+        </div>
+        <button class="signout" id="oBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign out
+        </button>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="on" data-v="ex"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Examination</button>
+      <button data-v="cs"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" stroke="currentColor" stroke-width="2"/></svg>Case Register</button>
+      <button data-v="vs"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21V9l9-6 9 6v12M9 21v-6h6v6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>VASP Directory</button>
+      <button data-v="rp"><svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 2v6h6M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Report</button>
+      <button data-v="ad"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>Audit Log</button>
+    </nav>
+    <div class="crumb"><div class="crumb-in">Home &rsaquo; <b id="cBits">Examination</b></div></div>
+  </div>
+
+  <div class="wrap">
+    <div class="col">
+
+      <!-- EXAMINATION -->
+      <div class="view on" id="v-ex">
+        <div class="qbar">
+          <span class="qicon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <input id="qIn" placeholder="Paste a wallet address (ETH or BTC) to examine&hellip;">
+          <button class="btn" id="qBtn">Examine</button>
+          <button class="btn sec" id="qClr">Reset</button>
+        </div>
+
+        <div id="exNil">
+          <div class="hello">
+            <div class="kick" id="dashHello">Welcome back</div>
+            <h2 class="ph">Wallet examination</h2>
+            <p class="pd">Trace an address, match it against the VASP Directory and file the outcome &mdash; all in one place.</p>
+          </div>
+
+          <div class="tiles">
+            <div class="tile t1"><div class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z'/></svg></div><div><b id="stCases">&mdash;</b><span>Cases filed</span></div></div>
+            <div class="tile t2"><div class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M12 3l10 18H2L12 3z'/><path d='M12 10v4M12 17.5v.01'/></svg></div><div><b id="stHigh">&mdash;</b><span>High-risk cases</span></div></div>
+            <div class="tile t3"><div class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d='M3 21V9l9-6 9 6v12M9 21v-6h6v6'/></svg></div><div><b id="stVasps">&mdash;</b><span>VASPs on record</span></div></div>
+            <div class="tile t4"><div class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x='3' y='6' width='18' height='13' rx='2'/><path d='M3 10h18M16 15h2'/></svg></div><div><b id="stWallets">&mdash;</b><span>Wallets indexed</span></div></div>
+          </div>
+
+          <div class="dgrid">
+            <div class="pnl"><div class="pnl-h"><h3>Try a specimen wallet</h3><span class="rt">one click</span></div>
+              <div class="pnl-b">
+                <p class="pd" style="margin:0">Pick an address to see a full examination instantly, or paste any ETH / BTC address in the search bar above.</p>
+                <div class="spl" id="spl"></div>
+              </div>
+            </div>
+            <div class="pnl"><div class="pnl-h"><h3>Recent activity</h3><span class="rt">from the audit log</span></div>
+              <ul class="act" id="actList"><li class="none">Loading&hellip;</li></ul>
+            </div>
+          </div>
+
+          <div class="sec-t">How an examination works</div>
+          <div class="steps">
+            <div class="stp"><div class="sn">1</div><div><b>Trace</b><p>Pulls the wallet&rsquo;s on-chain history and builds its fund-flow graph, out to three hops.</p></div></div>
+            <div class="stp"><div class="sn">2</div><div><b>Attribute</b><p>Matches counterparties against the VASP Directory and scores each candidate with cited evidence.</p></div></div>
+            <div class="stp"><div class="sn">3</div><div><b>Assess &amp; report</b><p>Grades the risk, lets you file a case, and exports a Form CS-2 PDF for the case file.</p></div></div>
+          </div>
+        </div>
+
+        <div id="exBusy" style="display:none">
+          <div class="pnl"><div class="pnl-h"><h3>Processing</h3><span class="rt">Please wait</span></div>
+            <div class="pnl-b"><div class="prog">
+              <div class="pt" id="pText">Connecting to the ChainScope API…</div>
+              <div class="pb"><i id="pBar"></i></div>
+            </div></div>
+          </div>
+        </div>
+
+        <div id="exOut" style="display:none"></div>
+      </div>
+
+      <!-- CASES -->
+      <div class="view" id="v-cs">
+        <div class="pagehead-row"><div><h2 class="ph">Case register</h2>
+        <p class="pd">Examinations filed by officers of this unit, with the attribution finding and risk grading recorded against each.</p></div></div>
+        <div class="pnl"><div class="pnl-h"><h3>Filed cases</h3><span class="rt" id="csCt">0 records</span></div>
+          <div class="pnl-b flush" id="csBd"></div></div>
+      </div>
+
+      <!-- VASPS -->
+      <div class="view" id="v-vs">
+        <div class="pagehead-row"><div><h2 class="ph">VASP directory</h2>
+        <p class="pd">Virtual asset service providers whose address clusters are on record. Attribution is measured against these entries.</p></div></div>
+        <div class="pnl"><div class="pnl-h"><h3>Registered service providers</h3><span class="rt" id="vsCt"></span></div>
+          <div class="pnl-b flush" id="vsBd"></div></div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="view" id="v-rp">
+        <div class="pagehead-row"><div><h2 class="ph">Investigation report</h2>
+        <p class="pd">Formatted output of the current examination for attachment to the case file.</p></div></div>
+        <div class="pnl">
+          <div class="pnl-h"><h3>Draft report</h3><span class="rt">Form CS-2</span></div>
+          <div class="pnl-b">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+              <button class="btn sec" id="rT">Narrative</button>
+              <button class="btn sec" id="rJ">JSON</button>
+              <button class="btn sec" id="rC">CSV</button>
+              <button class="btn sec" id="rCp">Copy to clipboard</button>
+              <button class="btn" id="rPdf">Download PDF</button>
+            </div>
+            <textarea class="rp" id="rBox" readonly>No examination has been carried out in this session.</textarea>
+            <p class="fn">The PDF is generated server-side (Form CS-2 layout) and is the one meant for attaching to a physical case file.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="view" id="v-ad">
+        <div class="pagehead-row"><div><h2 class="ph">Audit log</h2>
+        <p class="pd">Chronological record of activity in this session, retained for evidentiary and compliance purposes.</p></div></div>
+        <div class="pnl"><div class="pnl-h"><h3>Session activity</h3><span class="rt" id="adCt">0 records</span></div>
+          <div class="pnl-b flush" id="adBd"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="ft-in">
+      <span>ChainScope &middot; Team PHOENIX &middot; Smart India Hackathon, PS 26182</span>
+      <span><a>Terms</a> &middot; <a>Privacy</a> &middot; <a>Help</a></span>
+    </div>
+  </footer>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+/* ============================================================
+   CHAINSCOPE — API-CONNECTED BUILD
+   No scoring, attribution, or risk logic lives in this file
+   any more — every number on screen comes from the FastAPI
+   backend (see /app/services/attribution.py and risk.py there).
+   This file only renders what the API returns.
+============================================================ */
+let API='http://localhost:8000';
+let ses=null,cur=null;
+const cut=a=>a.length>22?a.slice(0,10)+'...'+a.slice(-6):a;
+function tst(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600);}
+
+/* ---------- API helper ---------- */
+async function api(path,opts={}){
+  let res;
+  try{
+    res=await fetch(API+path,{
+      ...opts,
+      headers:{
+        'Content-Type':'application/json',
+        ...(ses?{'Authorization':'Bearer '+ses.token}:{}),
+        ...(opts.headers||{})
+      }
+    });
+  }catch(e){
+    throw new Error('Could not reach the API at '+API+'. Is the backend running? ('+e.message+')');
+  }
+  if(res.status===401){
+    tst('Session expired or invalid — please sign in again');
+    doLogout();
+    throw new Error('Unauthorised');
+  }
+  if(!res.ok){
+    let detail='Request failed ('+res.status+')';
+    try{const j=await res.json();detail=j.detail||detail;}catch(e){}
+    throw new Error(detail);
+  }
+  if(res.status===204)return null;
+  return res.json();
+}
+
+/* ---------- PDF download (binary response, not JSON — separate from api()) ---------- */
+async function downloadPdf(path,filename){
+  let res;
+  try{
+    res=await fetch(API+path,{headers:ses?{'Authorization':'Bearer '+ses.token}:{}});
+  }catch(e){
+    tst('Could not reach the API at '+API+'. Is the backend running? ('+e.message+')');return;
+  }
+  if(res.status===401){tst('Session expired or invalid — please sign in again');doLogout();return;}
+  if(!res.ok){
+    let detail='Could not generate the PDF ('+res.status+')';
+    try{const j=await res.json();detail=j.detail||detail;}catch(e){}
+    tst(detail);return;
+  }
+  const blob=await res.blob();
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  tst('PDF downloaded');
+}
+
+/* ============ LOGIN ============ */
+document.getElementById('lBtn').onclick=login;
+document.getElementById('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+
+async function login(){
+  const apiUrl=document.getElementById('lApi').value.trim().replace(/\/+$/,'');
+  const u=document.getElementById('lUser').value.trim(),p=document.getElementById('lPass').value,
+        e=document.getElementById('lErr'),btn=document.getElementById('lBtn');
+  if(!apiUrl){e.textContent='API Base URL is a mandatory field.';return;}
+  if(!u){e.textContent='Officer ID is a mandatory field.';return;}
+  e.textContent='';API=apiUrl;
+  btn.textContent='Signing in…';btn.disabled=true;
+  try{
+    const r=await fetch(API+'/auth/login',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:u,password:p})
+    });
+    if(!r.ok){
+      const j=await r.json().catch(()=>({}));
+      e.textContent=j.detail||'Sign-in failed. Check the officer ID and password.';
+      btn.textContent='Login';btn.disabled=false;return;
+    }
+    const data=await r.json();
+    ses={u:data.email,r:data.role,token:data.access_token};
+    document.getElementById('lg').style.display='none';
+    document.getElementById('ap').style.display='block';
+    document.getElementById('lastLog').textContent='Logged in as '+ses.u+' ('+ses.r+') · '+new Date().toLocaleString('en-IN');
+    loadWallets();drawCases();drawVasps();drawAud();
+  }catch(ex){
+    e.textContent='Could not reach the API at '+API+'. Is the backend running? ('+ex.message+')';
+  }
+  btn.textContent='Login';btn.disabled=false;
+}
+document.getElementById('oBtn').onclick=doLogout;
+function doLogout(){
+  ses=null;cur=null;
+  document.getElementById('ap').style.display='none';
+  document.getElementById('lg').style.display='flex';
+  document.getElementById('lPass').value='demo123';
+}
+
+/* ============ NAV ============ */
+const NAMES={ex:'Examination',cs:'Case Register',vs:'VASP Directory',rp:'Report',ad:'Audit Log'};
+function go(v){
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.getElementById('cBits').textContent=NAMES[v];
+  if(v==='cs')drawCases();
+  if(v==='vs')drawVasps();
+  if(v==='ad')drawAud();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+
+/* ============ SPECIMEN LIST (from the API, not hardcoded) ============ */
+async function loadWallets(){
+  const sp=document.getElementById('spl');sp.innerHTML='';
+  try{
+    const wallets=await api('/wallets');
+    wallets.forEach(w=>{
+      const el=document.createElement('a');el.textContent=cut(w.address);
+      el.onclick=()=>{document.getElementById('qIn').value=w.address;run(w.address);};
+      sp.appendChild(el);
+    });
+  }catch(ex){ tst(ex.message); }
+}
+
+document.getElementById('qBtn').onclick=()=>run(document.getElementById('qIn').value.trim());
+document.getElementById('qClr').onclick=()=>{
+  document.getElementById('qIn').value='';cur=null;
+  document.getElementById('exOut').style.display='none';
+  document.getElementById('exBusy').style.display='none';
+  document.getElementById('exNil').style.display='block';};
+document.getElementById('qIn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('qBtn').click();});
+
+const ST=['Connecting to the ChainScope API','Retrieving wallet and transaction data',
+ 'Matching against the VASP Directory','Scoring evidence and ranking candidates',
+ 'Computing the risk grading'];
+
+async function run(a){
+  go('ex');
+  if(!a){tst('Wallet address is a mandatory field');return;}
+  document.getElementById('exNil').style.display='none';
+  document.getElementById('exOut').style.display='none';
+  document.getElementById('exBusy').style.display='block';
+  let i=0;const t=document.getElementById('pText'),b=document.getElementById('pBar');
+  const tick=setInterval(()=>{
+    if(i<ST.length-1){t.textContent=ST[i];b.style.width=((i+1)/ST.length*100)+'%';i++;}
+  },260);
+
+  try{
+    const data=await api('/wallets/'+encodeURIComponent(a)+'/examine');
+    clearInterval(tick);
+    document.getElementById('exBusy').style.display='none';
+    show(a,data);
+  }catch(ex){
+    clearInterval(tick);
+    document.getElementById('exBusy').style.display='none';
+    none(a,ex.message);
+  }
+}
+
+function none(a,msg){
+  const o=document.getElementById('exOut');o.style.display='block';
+  o.innerHTML='<div class="alert md"><span>⚠</span><span><b>No record found</b>'+
+    (msg||('There is no on-chain record for '+cut(a)+' on the API.'))+'</span></div>';
+}
+
+/* ============ RENDER EXAMINATION RESULT ============ */
+function show(a,data){
+  cur=data;   // the API response IS the state now — no local recomputation
+  const cand=data.candidates,g=data.risk,t=cand[0];
+  const cl=g.level==='HIGH'?'hi':g.level==='MEDIUM'?'md':'lo';
+
+  document.getElementById('exOut').innerHTML=`
+  <div class="alert ${cl}"><span>●</span><span>
+    <b>Risk grading: ${g.level} (${g.score}/100)</b>${g.remark}</span></div>
+
+  <div class="pnl"><div class="pnl-h"><h3>1. Particulars of the Address</h3><span class="rt">Form CS-1 · via API</span></div>
+    <div class="pnl-b flush"><table class="kv">
+      <tr><td class="k">Address</td><td class="v" colspan="3" style="word-break:break-all">${data.address}</td></tr>
+      <tr><td class="k">Network</td><td class="v">${data.chain}</td><td class="k">Balance held</td><td class="v">${data.balance_display}</td></tr>
+      <tr><td class="k">First activity</td><td class="v">${data.first_seen}</td><td class="k">Transactions</td><td class="v">${data.tx_count}</td></tr>
+      <tr><td class="k">Counterparties</td><td class="v">${new Set(data.edges.map(x=>x.to_address)).size}</td><td class="k">Candidates found</td><td class="v">${cand.length}</td></tr>
+    </table></div></div>
+
+  <div class="pnl"><div class="pnl-h"><h3>2. Fund Flow</h3><span class="rt">Solid: outgoing · Dashed: incoming</span></div>
+    <div class="pnl-b">
+      <svg id="gr" viewBox="0 0 700 280" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="lgd">
+        <span><i class="lk" style="background:#003366"></i>Address examined</span>
+        <span><i class="lk" style="background:#fff"></i>Unidentified counterparty</span>
+        <span><i class="lk" style="background:#004C99"></i>Recorded VASP cluster</span>
+        <span><i class="lk" style="background:#C1272D"></i>Mixing service</span>
+      </div></div></div>
+
+  <div class="pnl"><div class="pnl-h"><h3>3. Attribution Candidates</h3><span class="rt">${cand.length} record(s) · click a row for grounds</span></div>
+    <div class="pnl-b flush">${cand.length?`<table class="g">
+      <thead><tr><th style="width:36px">S.No.</th><th>Service Provider</th><th>Nature</th><th style="width:170px">Evidence Score</th></tr></thead>
+      <tbody>${cand.map((x,i)=>`<tr class="clk ${i===0?'sel':''}" data-i="${i}">
+        <td class="num">${i+1}</td><td style="font-weight:${i===0?600:400}">${x.vasp_name}</td>
+        <td>${x.vasp_type}</td>
+        <td><div class="mt"><div class="mtb"><div class="mtf" style="width:${x.score}%"></div></div><span class="mtn">${x.score}%</span></div></td>
+      </tr>`).join('')}</tbody></table>`
+    :'<div class="nil"><b>No candidate identified</b>This wallet has not interacted with any cluster on record.</div>'}
+    </div></div>
+
+  ${t?`<div class="pnl"><div class="pnl-h"><h3>4. Grounds for the Finding</h3><span class="rt" id="whv">${t.vasp_name}</span></div>
+    <div class="pnl-b"><ol class="ev" id="evb">${t.evidence.map(x=>`<li><b>${x.title}</b> — <span>${x.detail}</span></li>`).join('')}</ol></div></div>`:''}
+
+  <div class="pnl"><div class="pnl-h"><h3>5. Risk Grading</h3><span class="rt">Score ${g.score} / 100</span></div>
+    <div class="pnl-b flush"><table class="g">
+      <thead><tr><th>Indicator</th><th style="width:70px">Points</th></tr></thead>
+      <tbody>${g.factors.map(x=>`<tr><td>${x.name}</td><td class="num">+${x.points}</td></tr>`).join('')}
+      <tr style="background:var(--hdrow)"><td style="font-weight:600">Total — ${g.level}</td><td class="num" style="font-weight:600">${g.score}</td></tr>
+      </tbody></table></div></div>
+
+  <div class="pnl"><div class="pnl-h"><h3>6. Multi-hop VASP Proximity</h3><span class="rt">Graph Engine · Neo4j</span></div>
+    <div class="pnl-b flush" id="proxPnl"><div class="nil">Querying the graph engine…</div></div></div>
+
+  <div class="pnl"><div class="pnl-h"><h3>7. Extended Fund-Flow Network</h3><span class="rt">Up to 3 hops · Graph Engine</span></div>
+    <div class="pnl-b" id="graphExtPnl"><div class="nil">Querying the graph engine…</div></div></div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button class="btn" id="fCase">File as case</button>
+    <button class="btn sec" id="oRep">Open report</button>
+    <button class="btn sec" id="dlPdf">Download PDF</button>
+  </div>`;
+  document.getElementById('exOut').style.display='block';
+  graph(data);
+  loadGraphInsights(data.address);
+  document.querySelectorAll('#exOut tr.clk').forEach(tr=>tr.onclick=()=>{
+    document.querySelectorAll('#exOut tr.clk').forEach(x=>x.classList.remove('sel'));
+    tr.classList.add('sel');const x=cand[+tr.dataset.i];
+    document.getElementById('whv').textContent=x.vasp_name;
+    document.getElementById('evb').innerHTML=x.evidence.map(y=>`<li><b>${y.title}</b> — <span>${y.detail}</span></li>`).join('');});
+  document.getElementById('fCase').onclick=fileCase;
+  document.getElementById('oRep').onclick=()=>{rep('t');go('rp');};
+  document.getElementById('dlPdf').onclick=()=>downloadPdf(
+    '/wallets/'+encodeURIComponent(data.address)+'/report.pdf',
+    'ChainScope_'+data.address.slice(0,10)+'.pdf');
+  rep('t');
+}
+
+/* ---------- Graph Engine panels (Neo4j — multi-hop) ---------- */
+async function loadGraphInsights(address){
+  let prox=[],sub={nodes:[],edges:[]};
+  try{ prox=await api('/graph/'+encodeURIComponent(address)+'/proximity?max_hops=4'); }
+  catch(ex){ document.getElementById('proxPnl').innerHTML='<div class="nil"><b>Could not reach the graph engine</b>'+ex.message+'</div>';prox=null; }
+  try{ sub=await api('/graph/'+encodeURIComponent(address)+'/subgraph?depth=3'); }
+  catch(ex){ document.getElementById('graphExtPnl').innerHTML='<div class="nil"><b>Could not reach the graph engine</b>'+ex.message+'</div>';sub=null; }
+
+  if(prox!==null) renderProximity(prox);
+  if(sub!==null) renderExtendedGraph(address,sub);
+}
+
+function renderProximity(hits){
+  const b=document.getElementById('proxPnl');
+  if(!hits.length){b.innerHTML='<div class="nil"><b>No VASP reachable within 4 hops</b>Neither this address nor its known counterparties lead to a directory entry.</div>';return;}
+  b.innerHTML=`<table class="g"><thead><tr>
+    <th style="width:36px">S.No.</th><th>VASP</th><th style="width:70px">Hops</th><th style="width:76px">Grade</th><th>Path</th></tr></thead><tbody>
+    ${hits.map((h,i)=>`<tr>
+      <td class="num">${i+1}</td>
+      <td style="font-weight:500">${h.vasp_name||'—'}${h.hop_count>1?' <span style="color:var(--red);font-size:10.5px;font-weight:600">· indirect</span>':' <span style="color:var(--tx2);font-size:10.5px">· direct</span>'}</td>
+      <td class="num">${h.hop_count}</td>
+      <td>${h.risk_grade?`<span class="st ${h.risk_grade}">${h.risk_grade.toUpperCase()}</span>`:'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--tx2)">${h.path.map(cut).join(' → ')}</td>
+    </tr>`).join('')}</tbody></table>
+    ${hits.some(h=>h.hop_count>1)?'<div style="padding:9px 11px;font-size:11.5px;color:var(--tx2);border-top:1px solid var(--ln2)">Rows marked <b style="color:var(--red)">indirect</b> are not visible in the direct attribution table above — the address itself never touched those deposit addresses, but a counterparty it dealt with did.</div>':''}`;
+}
+
+function renderExtendedGraph(center,sub){
+  const b=document.getElementById('graphExtPnl');
+  if(!sub.edges.length){b.innerHTML='<div class="nil"><b>No multi-hop activity on record</b>The counterparties of this address have no further recorded movement.</div>';return;}
+
+  // BFS hop-level from the examined address, treating edges as undirected
+  const adj={};
+  sub.edges.forEach(e=>{(adj[e.from_address]=adj[e.from_address]||[]).push(e.to_address);
+    (adj[e.to_address]=adj[e.to_address]||[]).push(e.from_address);});
+  const level={[center]:0},q=[center];
+  while(q.length){const c=q.shift();(adj[c]||[]).forEach(n=>{if(!(n in level)){level[n]=level[c]+1;q.push(n);}});}
+
+  const byLevel={};
+  Object.keys(level).forEach(a=>{const l=level[a];(byLevel[l]=byLevel[l]||[]).push(a);});
+  const nodeInfo={};sub.nodes.forEach(n=>nodeInfo[n.address]=n);
+
+  const W=700,H=340,CX=W/2,CY=H/2,pos={};
+  pos[center]={x:CX,y:CY};
+  Object.keys(byLevel).filter(l=>l!=='0').forEach(l=>{
+    const addrs=byLevel[l],r=70*Number(l);
+    addrs.forEach((a,i)=>{
+      const ang=(i/addrs.length)*Math.PI*2 - Math.PI/2;
+      pos[a]={x:CX+r*Math.cos(ang),y:CY+r*Math.sin(ang)};
+    });
+  });
+
+  let s='';
+  sub.edges.forEach(e=>{
+    const p1=pos[e.from_address],p2=pos[e.to_address];if(!p1||!p2)return;
+    s+=`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#B9C2CC" stroke-width="1.2" opacity=".8"/>`;
+  });
+  Object.keys(pos).forEach(a=>{
+    const n=nodeInfo[a]||{},p=pos[a],isCenter=a===center;
+    const fill=isCenter?'#003366':n.is_vasp?(n.risk_grade==='high'?'#C1272D':'#004C99'):'#FFFFFF';
+    const r=isCenter?9:n.is_vasp?7:5;
+    s+=`<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${fill}" stroke="#5A6470" stroke-width="1"/>`;
+    const label=isCenter?'This address':n.is_vasp?n.vasp_name:cut(a);
+    s+=`<text x="${p.x}" y="${p.y+r+11}" fill="#4A5158" font-size="9.5" font-family="monospace" text-anchor="middle">${label}</text>`;
+  });
+
+  b.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:300px;background:#fff;border:1px solid var(--ln2)">${s}</svg>
+    <div class="lgd" style="margin-top:8px">
+      <span><i class="lk" style="background:#003366"></i>Address examined</span>
+      <span><i class="lk" style="background:#fff"></i>Wallet</span>
+      <span><i class="lk" style="background:#004C99"></i>Known VASP</span>
+      <span><i class="lk" style="background:#C1272D"></i>High-risk / mixer</span>
+    </div>
+    <p class="fn">Rings show hop distance from the examined address — outer rings are relationships found through a counterparty, not the address's own transactions.</p>`;
+}
+
+/* ---------- graph — reads is_vasp/vasp_name/risk_grade straight from the API ---------- */
+function graph(data){
+  const targets=[...new Set(data.edges.map(x=>x.to_address))];
+  const A={x:74,y:140};
+  const N=targets.map((addr,i)=>{
+    const e=data.edges.find(x=>x.to_address===addr);
+    return{id:addr,x:e.is_vasp?552:316,y:32+i*(214/Math.max(targets.length-1,1)),
+      f:e.is_vasp?(e.risk_grade==='high'?'#C1272D':'#004C99'):'#FFFFFF',
+      l:e.is_vasp?e.vasp_name:cut(addr),v:e.is_vasp};});
+  let s='';
+  data.edges.forEach(x=>{const b=N.find(n=>n.id===x.to_address);if(!b)return;
+    s+=`<path d="M${A.x} ${A.y} L ${(A.x+b.x)/2} ${(A.y+b.y)/2} L ${b.x} ${b.y}" fill="none"
+      stroke="${x.is_vasp?'#003366':'#8A939E'}" stroke-width="${Math.max(1,Math.min(3.5,x.amount/2))}"
+      ${x.direction==='in'?'stroke-dasharray="5 3" opacity=".55"':'opacity=".85"'}/>`;});
+  s+=`<rect x="${A.x-8}" y="${A.y-8}" width="16" height="16" fill="#003366"/>`;
+  s+=`<text x="${A.x-13}" y="${A.y+4}" fill="#4A5158" font-size="10.5" font-family="monospace" text-anchor="end">${cut(data.address)}</text>`;
+  N.forEach(n=>{const r=n.v?7:5.5;
+    s+=`<rect x="${n.x-r}" y="${n.y-r}" width="${r*2}" height="${r*2}" fill="${n.f}" stroke="#5A6470"/>`;
+    const R=n.x>450;
+    s+=`<text x="${n.x+(R?13:-11)}" y="${n.y+4}" fill="#4A5158" font-size="10.5" font-family="monospace" text-anchor="${R?'start':'end'}">${n.l}</text>`;});
+  document.getElementById('gr').innerHTML=s;
+}
+
+/* ============ CASES ============ */
+async function fileCase(){
+  if(!cur)return;
+  try{
+    const c=await api('/cases',{method:'POST',body:JSON.stringify({wallet_address:cur.address})});
+    tst('Case '+c.case_number+' filed');
+  }catch(ex){ tst(ex.message); }
+}
+async function drawCases(){
+  const b=document.getElementById('csBd');
+  b.innerHTML='<div class="nil">Loading…</div>';
+  let cases;
+  try{ cases=await api('/cases'); }catch(ex){ b.innerHTML='<div class="nil"><b>Could not load</b>'+ex.message+'</div>';return; }
+  document.getElementById('csCt').textContent=cases.length+' record(s)';
+  if(!cases.length){b.innerHTML='<div class="nil"><b>Register is empty</b>Examine an address and file it to open a case.</div>';return;}
+  b.innerHTML=`<table class="g"><thead><tr>
+    <th style="width:36px">S.No.</th><th>Case No.</th><th>Address</th><th>Attributed To</th>
+    <th style="width:78px">Confidence</th><th style="width:76px">Risk</th><th style="width:120px">Filed On</th><th style="width:110px">Status</th></tr></thead><tbody>
+    ${cases.map((c,i)=>`<tr><td class="num">${i+1}</td><td class="mono">${c.case_number}</td><td class="mono">${cut(c.wallet_address)}</td>
+      <td>${c.attributed_vasp||'—'}</td><td class="num">${c.confidence}%</td><td><span class="st ${c.risk_level.toLowerCase()}">${c.risk_level}</span></td>
+      <td class="mono">${new Date(c.filed_at).toLocaleDateString('en-IN')}</td>
+      <td><select class="stsel" data-c="${c.case_number}" style="font-size:11.5px;border:1px solid var(--ln);padding:2px 4px">
+        ${['Open','Under Review','Closed'].map(s=>`<option ${s===c.status?'selected':''}>${s}</option>`).join('')}
+      </select></td></tr>`).join('')}</tbody></table>`;
+  b.querySelectorAll('.stsel').forEach(sel=>sel.onchange=async()=>{
+    try{ await api('/cases/'+encodeURIComponent(sel.dataset.c)+'/status',{method:'PATCH',body:JSON.stringify({status:sel.value})});
+      tst(sel.dataset.c+' set to '+sel.value); }
+    catch(ex){ tst(ex.message); drawCases(); }
+  });
+}
+
+async function drawVasps(){
+  const b=document.getElementById('vsBd');
+  b.innerHTML='<div class="nil">Loading…</div>';
+  let vasps;
+  try{ vasps=await api('/vasps'); }catch(ex){ b.innerHTML='<div class="nil"><b>Could not load</b>'+ex.message+'</div>';return; }
+  document.getElementById('vsCt').textContent=vasps.length+' record(s)';
+  b.innerHTML=`<table class="g"><thead><tr>
+    <th style="width:36px">S.No.</th><th>Service Provider</th><th style="width:60px">Network</th><th>Nature</th>
+    <th style="width:76px">Addresses</th><th>Basis of Entry</th><th style="width:76px">Grade</th></tr></thead><tbody>
+    ${vasps.map((v,i)=>`<tr><td class="num">${i+1}</td><td style="font-weight:500">${v.name}</td>
+      <td class="mono">${v.chain}</td><td>${v.vasp_type}</td><td class="num">${v.address_count}</td>
+      <td style="color:var(--tx2)">${v.evidence_source}</td><td><span class="st ${v.risk_grade}">${v.risk_grade.toUpperCase()}</span></td></tr>`).join('')}</tbody></table>`;
+}
+
+async function drawAud(){
+  const b=document.getElementById('adBd');
+  b.innerHTML='<div class="nil">Loading…</div>';
+  let aud;
+  try{ aud=await api('/audit?limit=200'); }catch(ex){ b.innerHTML='<div class="nil"><b>Could not load</b>'+ex.message+'</div>';return; }
+  document.getElementById('adCt').textContent=aud.length+' record(s)';
+  if(!aud.length){b.innerHTML='<div class="nil"><b>No activity recorded</b></div>';return;}
+  b.innerHTML=`<table class="g"><thead><tr>
+    <th style="width:36px">S.No.</th><th style="width:150px">Timestamp</th><th>Officer</th>
+    <th style="width:180px">Action</th><th>Particulars</th></tr></thead><tbody>
+    ${aud.map((x,i)=>`<tr><td class="num">${aud.length-i}</td>
+      <td class="mono">${new Date(x.timestamp).toLocaleString('en-IN')}</td><td>${x.user_email}</td>
+      <td style="color:var(--blue);font-weight:500">${x.action}</td><td style="color:var(--tx2)">${x.detail}</td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ============ REPORT (built client-side from the API response — no new data invented) ============ */
+function rep(k){
+  const b=document.getElementById('rBox');
+  if(!cur){b.value='No examination has been carried out in this session.';return;}
+  const cand=cur.candidates,g=cur.risk,t=cand[0];
+  if(k==='j'){
+    b.value=JSON.stringify({issued:new Date().toISOString(),officer:ses.u,designation:ses.r,
+      wallet:{address:cur.address,network:cur.chain,balance:cur.balance_display,first_activity:cur.first_seen,transactions:cur.tx_count},
+      attribution:cand.map(x=>({provider:x.vasp_name,nature:x.vasp_type,confidence:x.score,interactions:x.interactions,volume:x.volume,
+        grounds:x.evidence.map(y=>y.title+' — '+y.detail)})),
+      risk:{score:g.score,grading:g.level,indicators:g.factors.map(x=>({indicator:x.name,points:x.points}))}},null,2);
+  }else if(k==='c'){
+    let c='field,value\naddress,'+cur.address+'\nnetwork,'+cur.chain+'\nbalance,'+cur.balance_display+'\ntransactions,'+cur.tx_count+
+          '\nrisk_score,'+g.score+'\nrisk_grading,'+g.level+'\n\nprovider,nature,confidence,interactions,volume\n';
+    cand.forEach(x=>c+=`${x.vasp_name},${x.vasp_type},${x.score},${x.interactions},${x.volume}\n`);
+    c+='\nindicator,points\n';g.factors.forEach(x=>c+=`${x.name},${x.points}\n`);
+    b.value=c;
+  }else{
+    const D='-'.repeat(62);
+    let s='GOVERNMENT OF INDIA · MINISTRY OF HOME AFFAIRS\n'+
+          'INDIAN CYBERCRIME COORDINATION CENTRE (I4C)\n'+
+          'CHAINSCOPE — REPORT OF EXAMINATION (FORM CS-2)\n'+D+'\n';
+    s+='Issued on   : '+new Date().toLocaleString('en-IN')+'\n';
+    s+='Officer     : '+ses.u+'\nDesignation : '+ses.r+'\n\n';
+    s+='1. PARTICULARS OF THE ADDRESS\n'+D+'\n';
+    s+='Address        : '+cur.address+'\nNetwork        : '+cur.chain+'\nBalance held   : '+cur.balance_display+
+       '\nFirst activity : '+cur.first_seen+'\nTransactions   : '+cur.tx_count+'\n\n';
+    s+='2. FINDING\n'+D+'\n';
+    if(t){
+      s+='The address is most probably associated with '+t.vasp_name+', a '+t.vasp_type.toLowerCase()+',\n'+
+         'at a confidence of '+t.score+' per cent.\n\nCandidates considered:\n';
+      cand.forEach((x,i)=>s+='   '+(i+1)+'. '+x.vasp_name.padEnd(20)+String(x.score).padStart(3)+'%   ('+x.interactions+' interactions)\n');
+      s+='\n3. GROUNDS FOR THE FINDING\n'+D+'\n';
+      t.evidence.forEach((x,i)=>s+='   ('+String.fromCharCode(97+i)+') '+x.title+'\n        '+x.detail+'\n');
+    }else s+='No interaction with any cluster on record was found. Attribution could\nnot be established on the available material.\n';
+    s+='\n4. RISK GRADING\n'+D+'\n';
+    s+='Score   : '+g.score+' out of 100\nGrading : '+g.level+'\nRemark  : '+g.remark+'\n\nIndicators taken into account:\n';
+    g.factors.forEach(x=>s+='   '+x.name.padEnd(44)+'+'+x.points+'\n');
+    s+='\n5. CAVEAT\n'+D+'\n';
+    s+='Attribution is probabilistic and rests upon the grounds set out above.\n'+
+       'A cluster match indicates likely association and not established\n'+
+       'ownership. This report is to be read alongside, and not in place of,\n'+
+       'the usual investigative procedure.\n\n'+D+'\n'+
+       'Signature of the Examining Officer      Date:\n';
+    b.value=s;
+  }
+}
+document.getElementById('rT').onclick=()=>rep('t');
+document.getElementById('rJ').onclick=()=>rep('j');
+document.getElementById('rC').onclick=()=>rep('c');
+document.getElementById('rCp').onclick=async()=>{
+  const b=document.getElementById('rBox');b.select();b.setSelectionRange(0,999999);
+  try{document.execCommand('copy');tst('Report copied to clipboard');}
+  catch(e){tst('Select the text and copy manually');}
+};
+document.getElementById('rPdf').onclick=()=>{
+  if(!cur){tst('No examination loaded — examine an address first');return;}
+  downloadPdf('/wallets/'+encodeURIComponent(cur.address)+'/report.pdf',
+    'ChainScope_'+cur.address.slice(0,10)+'.pdf');
+};
+</script>
+
+<script>
+/* ============================================================
+   Standalone theme toggle — deliberately independent of the main
+   app script above (no shared variables, no shared functions).
+   Only reads/writes localStorage['cs_theme'] and the <html
+   data-theme> attribute that the CSS in <style> already keys off.
+============================================================ */
+(function(){
+  var root = document.documentElement;
+  var sun = document.getElementById('themeIconSun');
+  var moon = document.getElementById('themeIconMoon');
+
+  function systemPrefersDark(){
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function effectiveTheme(){
+    var forced = root.getAttribute('data-theme');
+    if(forced === 'light' || forced === 'dark') return forced;
+    return systemPrefersDark() ? 'dark' : 'light';
+  }
+  function paintIcon(){
+    var dark = effectiveTheme() === 'dark';
+    sun.style.display = dark ? 'none' : 'block';
+    moon.style.display = dark ? 'block' : 'none';
+  }
+
+  try{
+    var saved = localStorage.getItem('cs_theme');
+    if(saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+  }catch(e){ /* localStorage unavailable — falls back to system preference, fine */ }
+  paintIcon();
+
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try{ localStorage.setItem('cs_theme', next); }catch(e){}
+    paintIcon();
+  });
+})();
+</script>
+
+<script>
+/* Dashboard enhancement — fills the stat tiles and activity feed on the Examination landing view.
+   Deliberately separate from the main app script (which is untouched): it only READS, through the
+   same api() helper the main script defines, and never writes to anything the main script owns. */
+(function(){
+  function $(id){return document.getElementById(id);}
+  function loggedIn(){ try{ return !!(ses && ses.token); }catch(e){ return false; } }
+
+  function tween(el,to){
+    if(!el) return;
+    if(typeof to!=='number'){ el.textContent=to; return; }
+    var from=0,steps=18,i=0;
+    clearInterval(el._t);
+    if(to===0){ el.textContent='0'; return; }
+    el._t=setInterval(function(){
+      i++; var v=Math.round(from+(to-from)*(1-Math.pow(1-i/steps,3)));
+      el.textContent=String(v);
+      if(i>=steps){ clearInterval(el._t); el.textContent=String(to); }
+    },28);
+  }
+  function ago(iso){
+    if(!iso) return '';
+    var t=String(iso); if(!/[zZ]|[+-]\d\d:?\d\d$/.test(t)) t+='Z';   // server sends naive UTC
+    var d=(Date.now()-new Date(t).getTime())/1000;
+    if(isNaN(d)) return '';
+    if(d<60) return 'just now'; if(d<3600) return Math.floor(d/60)+'m ago';
+    if(d<86400) return Math.floor(d/3600)+'h ago'; return Math.floor(d/86400)+'d ago';
+  }
+  var ICONS={
+    search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+    folder:'<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>',
+    user:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    file:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>'
+  };
+  function kind(a){ a=String(a||'').toUpperCase();
+    if(a.indexOf('EXAM')>-1) return 'search'; if(a.indexOf('CASE')>-1) return 'folder';
+    if(a.indexOf('LOGIN')>-1||a.indexOf('LOGOUT')>-1) return 'user';
+    if(a.indexOf('REPORT')>-1||a.indexOf('PDF')>-1) return 'file'; return 'clock'; }
+
+  function renderActivity(items){
+    var ul=$('actList'); if(!ul) return;
+    ul.innerHTML='';
+    if(!items||!items.length){ var li=document.createElement('li'); li.className='none';
+      li.textContent=items?'No activity recorded yet.':'Activity feed unavailable.'; ul.appendChild(li); return; }
+    items.forEach(function(x){
+      var li=document.createElement('li');
+      var dot=document.createElement('div'); dot.className='dot';
+      dot.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[kind(x.action)]+'</svg>';
+      var tx=document.createElement('div'); tx.className='tx';
+      var b=document.createElement('b'); b.textContent=x.action||'';          // textContent: API data never parsed as HTML
+      var sp=document.createElement('span'); sp.textContent=x.detail||'';
+      tx.appendChild(b); tx.appendChild(sp);
+      var tm=document.createElement('time'); tm.textContent=ago(x.timestamp);
+      li.appendChild(dot); li.appendChild(tx); li.appendChild(tm); ul.appendChild(li);
+    });
+  }
+
+  var busy=false;
+  async function refresh(){
+    if(!loggedIn()||busy) return;
+    busy=true;
+    try{
+      var hello=$('dashHello');
+      if(hello){ hello.textContent='Welcome back, '+(ses.r||'Officer')+' \u00b7 '+
+        new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'}); }
+      var res=await Promise.all([
+        api('/cases').catch(function(){return null;}),
+        api('/vasps').catch(function(){return null;}),
+        api('/wallets').catch(function(){return null;}),
+        api('/audit?limit=6').catch(function(){return null;})
+      ]);
+      var cases=res[0],vasps=res[1],wallets=res[2],aud=res[3];
+      tween($('stCases'),  cases?cases.length:'\u2014');
+      tween($('stHigh'),   cases?cases.filter(function(c){return String(c.risk_level).toUpperCase()==='HIGH';}).length:'\u2014');
+      tween($('stVasps'),  vasps?vasps.length:'\u2014');
+      tween($('stWallets'),wallets?wallets.length:'\u2014');
+      renderActivity(aud);
+    }catch(e){ /* dashboard is decorative — never surface errors */ }
+    busy=false;
+  }
+
+  // refresh when the app becomes visible (login), when the landing view is shown again (Reset),
+  // when the Examination tab is clicked, and shortly after a case is filed
+  var ap=$('ap'), nil=$('exNil');
+  if(ap) new MutationObserver(function(){ if(ap.style.display!=='none') refresh(); }).observe(ap,{attributes:true,attributeFilter:['style']});
+  if(nil) new MutationObserver(function(){ if(nil.style.display!=='none') refresh(); }).observe(nil,{attributes:true,attributeFilter:['style']});
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(t.closest && t.closest('.nav button[data-v="ex"]')) refresh();
+    if(t.id==='fCase') setTimeout(refresh,900);
+  });
+})();
+</script>
+</body>
+</html>
